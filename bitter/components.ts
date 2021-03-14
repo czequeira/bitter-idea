@@ -1,5 +1,6 @@
-import { createComponent, componentToFunction } from './index'
+import { Child, Component, Content } from './class';
+import { createComponent } from './index'
 
-const P = createComponent({ type: 'p' })
-const p = componentToFunction(P)
-
+export function p(content: Content, ...childs: Child[] ): Component {
+  return createComponent('p', content, childs)
+}

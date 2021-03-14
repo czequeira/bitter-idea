@@ -1,16 +1,6 @@
-import { createApp, createComponent, createBind } from '../bitter/index'
+import { createApp } from '../bitter/index'
+import { p } from '../bitter/components'
 
-const count = createBind({ name: 'count', initial: 0 })
+const c1 = p('hola mundo')
 
-const paragraph = createComponent({ content: 'initial value', type: 'p' })
-paragraph.setFunction((count: number) => `count: ${count}`)
-paragraph.bind(count) // esto tiene que hacerlo interno el framework
-
-const button = createComponent({ type: 'button', content: '+1' })
-button.addMethod('plusOne', () => count.setValue(count.value + 1))
-
-const App = createComponent({ childs: [paragraph, button] })
-
-createApp(App)
-
-button.addEvent('click', 'plusOne')
+createApp([c1])
