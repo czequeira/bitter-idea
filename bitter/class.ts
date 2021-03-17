@@ -1,45 +1,66 @@
 export type Child = Component|string
 export type Element = HTMLElement|Text
-export type Content = string
+export type Content = string|(() => string)
+export type Fn = ((...args: any[]) => any)
+export interface Binds {
+  [name: string]: Bind
+}
+export interface Events {
+  [name: string]: Event
+}
 
-// export class Bind {
-//   name: string = null
-//   value: any = null
-//   subscribers: Component[] = []
-//
-//   constructor({ name, value }) {
-//     this.name = name
-//     this.value = value
-//   }
-//
-//   setValue(value: any) {
-//     this.value = value
-//     this.subscribers.forEach(i => i.refresh())
-//   }
-//
-//   subscribe(component: Component) {
-//     this.subscribers.push(component)
-//   }
-// }
-//
+export class Bind {
+  subscribers: Component[] = []
+
+  constructor(
+    private name: string,
+    private value: any = null
+  ) {}
+
+  setValue(value: any) {
+    this.value = value
+    this.subscribers.forEach(i => i.refresh())
+  }
+
+  getValue(): any {
+    return this.value
+  }
+
+  subscribe(component: Component) {
+    this.subscribers.push(component)
+  }
+}
+
+export class Event {
+  constructor(
+    private name: string,
+    private fn: Fn = null,
+    private domName: string = null,
+  ) {}
+
+  setFn(fn: Fn): void {
+    this.fn = fn
+  }
+
+  exec(...args: any[]): any {
+    return this.fn(...args)
+  }
+}
+
 // export class Method {
-//   name: string = null
-//   fn: any = null
-//   component: Component = null
+//   constructor(
+//     private name: string,
+//     private fn: Fn = null
+//   ) {}
 //
-//   constructor({ name, fn, component }) {
-//     this.name = name
-//     this.fn = fn
-//     this.component = component
-//   }
-//
-//   exec() {
-//     return this.fn(this.component.getBinds().map((i) => i.value))
+//   exec(): any {
+//     return this.fn()
 //   }
 // }
 
 export class App {
   private element: HTMLElement = null
+  private binds: Binds = {}
 
   constructor(
     private childs: Component[] = [],
@@ -47,22 +68,39 @@ export class App {
     this.element = document.getElementById('app')
     this.element.append(...childs.map(c => c.getElement()))
   }
+
+  setChilds(...childs: Component[]) {
+    this.childs = childs
+    this.element.append(...childs.map(c => c.getElement()))
+  }
+
+  createBind(name: string, value: any = null): Bind {
+    const bind = new Bind(name, value)
+    this.binds[name] = bind
+    return bind
+  }
 }
 
 export class Component {
   private element: Element = null
+  private events: Events = {}
 
   constructor(
     type: string = null,
     private content: Content = null,
     private childs: Component[] = [],
   ) {
+    let textContent: string = null
+    if (typeof content === 'string') textContent = content
+    else if (typeof content === 'function') textContent = content()
     if (type) {
       this.element = document.createElement(type)
-      if (typeof content === 'string') this.element.innerText = content
+      this.element.innerText = textContent
       this.element.append(...childs.map(child => child.getElement()))
     }
-    else this.element = document.createTextNode(content)
+    else {
+      this.element = document.createTextNode(textContent)
+    }
   }
 
   setChilds(...childs: Component[]): void {
@@ -73,18 +111,25 @@ export class Component {
     return this.element
   }
 
-  // addEvent(event: string, method: string) {
-  //   this.element.addEventListener(event, () => this.exec(method))
-  // }
+  addEvent(name: string, fn: Fn, domName: string = null) {
+    const event = new Event(name, fn, domName)
+    if (domName) 
+      this.element.addEventListener(domName, (...args: any[]) => event.exec(...args))
+  }
 
   // exec(name: string) {
   //   const method = this.methods.find(i => i.name === name)
   //   return method.exec()
   // }
 
-  // refresh() {
-    // this.element.innerText = this.fn(this.binds.map(i => i.value))
-  // }
+  refresh() {
+    let textContent: string = null
+    if (typeof this.content === 'string') textContent = this.content
+    else if (typeof this.content === 'function') textContent = this.content()
+
+    if (this.element instanceof HTMLElement) this.element.innerText = textContent
+    else if (this.element instanceof Text) this.element.textContent = textContent
+  }
 
   // build() {
   //   const element = document.createElement(this.type)

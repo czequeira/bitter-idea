@@ -1,6 +1,13 @@
 import { createApp } from '../bitter/index'
-import { p } from '../bitter/components'
+import { p, button } from '../bitter/components'
 
-const c1 = p('hola mundo')
+const app = createApp([])
+const count = app.createBind('count', 0)
 
-createApp([c1])
+const c1 = p(() => `count: ${count.getValue()}`)
+const bn = button(() => count.setValue(parseInt(count.getValue()) + 1), '+1')
+
+count.subscribe(c1)
+
+app.setChilds(c1, bn)
+
