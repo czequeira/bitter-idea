@@ -35,7 +35,6 @@ export class Event {
   constructor(
     private name: string,
     private fn: Fn = null,
-    private domName: string = null,
   ) {}
 
   setFn(fn: Fn): void {
@@ -111,10 +110,9 @@ export class Component {
     return this.element
   }
 
-  addEvent(name: string, fn: Fn, domName: string = null) {
-    const event = new Event(name, fn, domName)
-    if (domName) 
-      this.element.addEventListener(domName, (...args: any[]) => event.exec(...args))
+  addEvent(name: string, fn: Fn) {
+    const event = new Event(name, fn)
+    this.element.addEventListener(name, (...args: any[]) => event.exec(...args))
   }
 
   // exec(name: string) {

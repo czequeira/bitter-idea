@@ -7,6 +7,6 @@ export function p(content: Content, ...childs: Child[] ): Component {
 
 export function button(fn: Fn, ...childs: Child[]): Component {
   const button = createComponent('button', null, childs)
-  button.addEvent('click', fn, 'click')
+  button.addEvent('click', fn)
   return button
 }

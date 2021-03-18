@@ -21,10 +21,9 @@ class Bind {
 }
 exports.Bind = Bind;
 class Event {
-    constructor(name, fn = null, domName = null) {
+    constructor(name, fn = null) {
         this.name = name;
         this.fn = fn;
-        this.domName = domName;
     }
     setFn(fn) {
         this.fn = fn;
@@ -89,10 +88,9 @@ class Component {
     getElement() {
         return this.element;
     }
-    addEvent(name, fn, domName = null) {
-        const event = new Event(name, fn, domName);
-        if (domName)
-            this.element.addEventListener(domName, (...args) => event.exec(...args));
+    addEvent(name, fn) {
+        const event = new Event(name, fn);
+        this.element.addEventListener(name, (...args) => event.exec(...args));
     }
     // exec(name: string) {
     //   const method = this.methods.find(i => i.name === name)
@@ -123,7 +121,7 @@ function p(content, ...childs) {
 exports.p = p;
 function button(fn, ...childs) {
     const button = index_1.createComponent('button', null, childs);
-    button.addEvent('click', fn, 'click');
+    button.addEvent('click', fn);
     return button;
 }
 exports.button = button;
